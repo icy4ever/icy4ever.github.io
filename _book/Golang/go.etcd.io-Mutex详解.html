@@ -1,0 +1,733 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Etcd Mutex详解 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="Golang-map源码片段解读.html" />
+    
+    
+    <link rel="prev" href="Go函数字典.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    介绍
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="Golang_Intro.html">
+            
+                <a href="Golang_Intro.html">
+            
+                    
+                    GoLang
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="Go函数字典.html">
+            
+                <a href="Go函数字典.html">
+            
+                    
+                    Go函数字典
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.2.2" data-path="go.etcd.io-Mutex详解.html">
+            
+                <a href="go.etcd.io-Mutex详解.html">
+            
+                    
+                    Etcd Mutex详解
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="Golang-map源码片段解读.html">
+            
+                <a href="Golang-map源码片段解读.html">
+            
+                    
+                    Go Map 底层实现源码解读
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="Golang运行命令行命令.html">
+            
+                <a href="Golang运行命令行命令.html">
+            
+                    
+                    Go 运行命令行命令
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="../Golangtimerate源码解析.md">
+            
+                <span>
+            
+                    
+                    Go timerate源码片段解读
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../Leetcode/Leetcode_Intro.html">
+            
+                <a href="../Leetcode/Leetcode_Intro.html">
+            
+                    
+                    Leetcode算法题解
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.3.1" data-path="../Leetcode/算法题-括号生成.html">
+            
+                <a href="../Leetcode/算法题-括号生成.html">
+            
+                    
+                    括号生成
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.2" data-path="../Leetcode/算法题-三数之和.html">
+            
+                <a href="../Leetcode/算法题-三数之和.html">
+            
+                    
+                    三数之和
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.3" data-path="../Leetcode/算法题-合并K个排序链表.html">
+            
+                <a href="../Leetcode/算法题-合并K个排序链表.html">
+            
+                    
+                    合并K个排序链表
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.4" data-path="../Leetcode/算法题-重建二叉树.html">
+            
+                <a href="../Leetcode/算法题-重建二叉树.html">
+            
+                    
+                    重建二叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="../Linux/Linux_Intro.html">
+            
+                <a href="../Linux/Linux_Intro.html">
+            
+                    
+                    Linux相关
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="../Linux/常用命令.html">
+            
+                <a href="../Linux/常用命令.html">
+            
+                    
+                    Linux常用命令
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="../Linux/Linux防火墙的打开与关闭.html">
+            
+                <a href="../Linux/Linux防火墙的打开与关闭.html">
+            
+                    
+                    Linux防火墙的打开与关闭
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="../Redis/Redis_Intro.html">
+            
+                <a href="../Redis/Redis_Intro.html">
+            
+                    
+                    Redis相关
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.5.1" data-path="../Redis/Redis-PipeLine.html">
+            
+                <a href="../Redis/Redis-PipeLine.html">
+            
+                    
+                    PipeLine
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.2" data-path="../Redis/Redis持久化存储.html">
+            
+                <a href="../Redis/Redis持久化存储.html">
+            
+                    
+                    持久化存储
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.3" data-path="../Redis/Redis内存淘汰策略.html">
+            
+                <a href="../Redis/Redis内存淘汰策略.html">
+            
+                    
+                    内存淘汰策略
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.4" data-path="../Redis/Redis哨兵和集群.html">
+            
+                <a href="../Redis/Redis哨兵和集群.html">
+            
+                    
+                    哨兵和集群
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.5" data-path="../Redis/Redis主从.html">
+            
+                <a href="../Redis/Redis主从.html">
+            
+                    
+                    主从
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="../Nginx/Nginx_Intro.html">
+            
+                <a href="../Nginx/Nginx_Intro.html">
+            
+                    
+                    Nginx相关
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.6.1" data-path="../Nginx/Nginx.conf配置.html">
+            
+                <a href="../Nginx/Nginx.conf配置.html">
+            
+                    
+                    配置文件
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.2" data-path="../Nginx/NGINX基础命令.html">
+            
+                <a href="../Nginx/NGINX基础命令.html">
+            
+                    
+                    基础命令
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../MySQL/MySQL_Intro.html">
+            
+                <a href="../MySQL/MySQL_Intro.html">
+            
+                    
+                    MySQL相关
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.7.1" data-path="../MySQL/Mysql防止重复插入的最佳实践.html">
+            
+                <a href="../MySQL/Mysql防止重复插入的最佳实践.html">
+            
+                    
+                    防止重复插入的最佳实践
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7.2" data-path="../MySQL/MySQL索引失效原因总结.html">
+            
+                <a href="../MySQL/MySQL索引失效原因总结.html">
+            
+                    
+                    索引失效原因总结
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7.3" data-path="../MySQL/MySQL主从（master-slave）.html">
+            
+                <a href="../MySQL/MySQL主从（master-slave）.html">
+            
+                    
+                    主从
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Etcd Mutex详解</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <pre><code class="lang-go"><span class="hljs-keyword">package</span> concurrency
+
+<span class="hljs-keyword">import</span> (
+    <span class="hljs-string">&quot;context&quot;</span>
+    <span class="hljs-string">&quot;fmt&quot;</span>
+    <span class="hljs-string">&quot;sync&quot;</span>
+
+    v3 <span class="hljs-string">&quot;github.com/coreos/etcd/clientv3&quot;</span>
+    pb <span class="hljs-string">&quot;github.com/coreos/etcd/etcdserver/etcdserverpb&quot;</span>
+)
+
+<span class="hljs-comment">// Mutex implements the sync Locker interface with etcd</span>
+<span class="hljs-keyword">type</span> Mutex <span class="hljs-keyword">struct</span> {
+    s *Session
+
+    pfx   <span class="hljs-keyword">string</span>
+    myKey <span class="hljs-keyword">string</span>
+    myRev <span class="hljs-keyword">int64</span>
+    hdr   *pb.ResponseHeader
+}
+
+<span class="hljs-keyword">func</span> NewMutex(s *Session, pfx <span class="hljs-keyword">string</span>) *Mutex {
+    <span class="hljs-keyword">return</span> &amp;Mutex{s, pfx + <span class="hljs-string">&quot;/&quot;</span>, <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-number">-1</span>, <span class="hljs-literal">nil</span>}
+}
+
+<span class="hljs-comment">// Lock locks the mutex with a cancelable context. If the context is canceled</span>
+<span class="hljs-comment">// while trying to acquire the lock, the mutex tries to clean its stale lock entry.</span>
+<span class="hljs-keyword">func</span> (m *Mutex) Lock(ctx context.Context) error {
+    s := m.s
+    client := m.s.Client()
+
+  <span class="hljs-comment">//&#x8FD9;&#x91CC;&#x62FF;Session&#x7684;Id&#x4F5C;&#x4E3A;Key</span>
+    m.myKey = fmt.Sprintf(<span class="hljs-string">&quot;%s%x&quot;</span>, m.pfx, s.Lease())
+    cmp := v3.Compare(v3.CreateRevision(m.myKey), <span class="hljs-string">&quot;=&quot;</span>, <span class="hljs-number">0</span>)
+    <span class="hljs-comment">// put self in lock waiters via myKey; oldest waiter holds lock</span>
+    put := v3.OpPut(m.myKey, <span class="hljs-string">&quot;&quot;</span>, v3.WithLease(s.Lease()))
+    <span class="hljs-comment">// reuse key in case this session already holds the lock</span>
+    get := v3.OpGet(m.myKey)
+    <span class="hljs-comment">// fetch current holder to complete uncontended path with only one RPC</span>
+    getOwner := v3.OpGet(m.pfx, v3.WithFirstCreate()...)
+    resp, err := client.Txn(ctx).If(cmp).Then(put, getOwner).Else(get, getOwner).Commit()
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+    m.myRev = resp.Header.Revision
+    <span class="hljs-keyword">if</span> !resp.Succeeded {
+        m.myRev = resp.Responses[<span class="hljs-number">0</span>].GetResponseRange().Kvs[<span class="hljs-number">0</span>].CreateRevision
+    }
+    <span class="hljs-comment">// if no key on prefix / the minimum rev is key, already hold the lock</span>
+    ownerKey := resp.Responses[<span class="hljs-number">1</span>].GetResponseRange().Kvs
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(ownerKey) == <span class="hljs-number">0</span> || ownerKey[<span class="hljs-number">0</span>].CreateRevision == m.myRev {
+        m.hdr = resp.Header
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+    }
+
+    <span class="hljs-comment">// wait for deletion revisions prior to myKey</span>
+    hdr, werr := waitDeletes(ctx, client, m.pfx, m.myRev<span class="hljs-number">-1</span>)
+    <span class="hljs-comment">// release lock key if wait failed</span>
+    <span class="hljs-keyword">if</span> werr != <span class="hljs-literal">nil</span> {
+        m.Unlock(client.Ctx())
+    } <span class="hljs-keyword">else</span> {
+        m.hdr = hdr
+    }
+    <span class="hljs-keyword">return</span> werr
+}
+
+<span class="hljs-keyword">func</span> (m *Mutex) Unlock(ctx context.Context) error {
+    client := m.s.Client()
+    <span class="hljs-keyword">if</span> _, err := client.Delete(ctx, m.myKey); err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+    m.myKey = <span class="hljs-string">&quot;\x00&quot;</span>
+    m.myRev = <span class="hljs-number">-1</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+}
+
+<span class="hljs-keyword">func</span> (m *Mutex) IsOwner() v3.Cmp {
+    <span class="hljs-keyword">return</span> v3.Compare(v3.CreateRevision(m.myKey), <span class="hljs-string">&quot;=&quot;</span>, m.myRev)
+}
+
+<span class="hljs-keyword">func</span> (m *Mutex) Key() <span class="hljs-keyword">string</span> { <span class="hljs-keyword">return</span> m.myKey }
+
+<span class="hljs-comment">// Header is the response header received from etcd on acquiring the lock.</span>
+<span class="hljs-keyword">func</span> (m *Mutex) Header() *pb.ResponseHeader { <span class="hljs-keyword">return</span> m.hdr }
+
+<span class="hljs-keyword">type</span> lockerMutex <span class="hljs-keyword">struct</span>{ *Mutex }
+
+<span class="hljs-keyword">func</span> (lm *lockerMutex) Lock() {
+    client := lm.s.Client()
+    <span class="hljs-keyword">if</span> err := lm.Mutex.Lock(client.Ctx()); err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-built_in">panic</span>(err)
+    }
+}
+<span class="hljs-keyword">func</span> (lm *lockerMutex) Unlock() {
+    client := lm.s.Client()
+    <span class="hljs-keyword">if</span> err := lm.Mutex.Unlock(client.Ctx()); err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-built_in">panic</span>(err)
+    }
+}
+
+<span class="hljs-comment">// NewLocker creates a sync.Locker backed by an etcd mutex.</span>
+<span class="hljs-keyword">func</span> NewLocker(s *Session, pfx <span class="hljs-keyword">string</span>) sync.Locker {
+    <span class="hljs-keyword">return</span> &amp;lockerMutex{NewMutex(s, pfx)}
+}
+</code></pre>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Go函数字典.html" class="navigation navigation-prev " aria-label="Previous page: Go函数字典">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="Golang-map源码片段解读.html" class="navigation navigation-next " aria-label="Next page: Go Map 底层实现源码解读">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Etcd Mutex详解","level":"1.2.2","depth":2,"next":{"title":"Go Map 底层实现源码解读","level":"1.2.3","depth":2,"path":"Golang/Golang-map源码片段解读.md","ref":"Golang/Golang-map源码片段解读.md","articles":[]},"previous":{"title":"Go函数字典","level":"1.2.1","depth":2,"path":"Golang/Go函数字典.md","ref":"Golang/Go函数字典.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["expandable-chapters-small","livereload"],"pluginsConfig":{"expandable-chapters-small":{},"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"Golang/go.etcd.io-Mutex详解.md","mtime":"2020-06-04T13:00:17.249Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-07-20T13:27:35.845Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-livereload/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
