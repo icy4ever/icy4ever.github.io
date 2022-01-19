@@ -1,0 +1,39 @@
+﻿_site
+# idea ignore
+.idea/
+*.ipr
+*.iml
+*.iws
+
+biligo/
+.vscode/
+
+*.swp
+
+# temp ignore
+*.log
+*.cache
+*.diff
+*.exe
+*.exe~
+*.patch
+*.json
+*.tmp
+*debug.test
+*.#*
+
+# system ignore
+.DS_Store
+Thumbs.db
+
+# project
+*.cert
+*.key
+.test
+iprepo.txt
+main
+
+_output
+
+vendor/
+mpa-comet-web
