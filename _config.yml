@@ -23,8 +23,9 @@ theme: "minima"
 
 rss: rss
 
-kramdown:
-  input: Kramdown
+commonmark:
+  options: ["UNSAFE", "SMART", "FOOTNOTES"]
+  extensions: ["strikethrough", "autolink", "table", "tagfilter"]
     
 plugins:
   - jekyll-feed
