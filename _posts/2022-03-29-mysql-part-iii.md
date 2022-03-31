@@ -1,4 +1,4 @@
-# MySQL随笔 - Buffer Pool
+# MySQL随笔 - 内存数据结构
 
 ​	MySQL和大部分程序一样，会在内存和磁盘中存储数据。内存中存储数据主要是提示数据的访问速度，让热数据能更快的返回。在内存中，主要的数据会放在buffer pool中，其中又分为四大部分：buffer pool list、change buffer、adaptive hash index、log buffer。
 
@@ -87,3 +87,4 @@ I/O sum[0]:cur[0], unzip sum[0]:cur[0]
 | 0        | 2         | 1848  | 9398         | INDEX      | 0           | 0          | NO         | 0                    | 0                    | 2507606063   | \`a\`.\`c\` | PRIMARY     | 99              | 15129      | 0                | FILE\_PAGE  | IO\_NONE | NO      | 11762960          |
 | 0        | 3         | 0     | 669          | UNDO\_LOG  | 1           | 0          | NO         | 23585329985          | 0                    | 3298651665   | NULL        | NULL        | 0               | 0          | 0                | FILE\_PAGE  | IO\_NONE | NO      | 11764958          |
 | 0        | 4         | 1847  | 15252        | INDEX      | 0           | 0          | NO         | 0                    | 0                    | 3620867147   | \`a\`.\`b\` | PRIMARY     | 36              | 15138      | 0                | FILE\_PAGE  | IO\_NONE | YES     | 0                 |
+
