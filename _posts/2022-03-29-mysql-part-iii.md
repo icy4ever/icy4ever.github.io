@@ -1,8 +1,10 @@
 # MySQL随笔 - Buffer Pool
 
-​	MySQL和大部分程序一样，会在内存和磁盘中存储数据。内存中存储数据主要是提示数据的访问速度，让热数据能更快的返回。而对于Buffer Pool来说，它还会被分为young和old两块区域，那么下面我们就来看一下它具体的实现。
+​	MySQL和大部分程序一样，会在内存和磁盘中存储数据。内存中存储数据主要是提示数据的访问速度，让热数据能更快的返回。在内存中，主要的数据会放在buffer pool中，其中又分为四大部分：buffer pool list、change buffer、adaptive hash index、log buffer。
 
-## 数据分区
+## Buffer Pool
+
+### Buffer Pool List
 
 ​	MySQL的buffer pool采用的是**链表**数据结构，并使用了**LRU算法**来淘汰旧数据。数据按照冷热会被分为两块区域，如下图所示：
 
@@ -11,6 +13,22 @@
 
 
 ​	当用户通过一条查询语句来查询数据时（全表查询除外），新的数据会被放在上图中Old Sublist的Head位置，而溢出的Old Sublist的尾部将被淘汰。当它再次被访问时，Old Sublist的内存页会被上升到New Sublist里。通过这样的机制，buffer pool保证里在内存里的数据都是最热的数据。也不难的出结论：当MySQL的buffer pool增加到一定程度时，它其实本质上就会变为一个缓存。
+
+### Change Buffer
+
+​	change buffer也是MySQL内存中的一个数据结构，它的存在是为了减少二级索引对查询性能的影响。
+
+![Content is described in the surrounding text.](https://docs.oracle.com/cd/E17952_01/mysql-5.7-en/images/innodb-change-buffer.png)
+
+​	当MySQL存在一些update、delete等数据变动对二级索引产生影响时，不会立即去改动磁盘中的数据，防止磁盘的随机i/o对数据造成影响，这些变动的页会被记录到change buffer中。当数据被读取到buffer pool中时，change buffer的数据才会被同步刷新到磁盘。
+
+### Adaptive Hash Index
+
+​	适应性hash索引是一种将经常访问的数据添加到内存中的数据结构，它可以让用户更快的访问到内存中的数据。
+
+### Log Buffer
+
+​	Log Buffer是一个会周期性同步数据到Log file的缓存，当Log Buffer增加时，我们可以获得更快的事务支持。因为它会将redo log放入缓存中，加速了事务的提交，减少了磁盘的I/O。
 
 ## Buffer Pool监控
 
@@ -54,10 +72,18 @@ I/O sum[0]:cur[0], unzip sum[0]:cur[0]
 
 ​	从上面看出buffer pool的页大小为7162，但是算一下按照3/8是Old Sublist的话，这里的页数量大致符合。其次是Buffer pool size 约等于 database pages和old database pages的和。
 
-​	buffer pool在表information_schema.INNODB_BUFFER_POOL_STATS中页也有对应的信息：
+​	buffer pool在表**information_schema.INNODB_BUFFER_POOL_STATS**中页也有对应的信息：
 
 | POOL\_ID | POOL\_SIZE | FREE\_BUFFERS | DATABASE\_PAGES | OLD\_DATABASE\_PAGES | MODIFIED\_DATABASE\_PAGES | PENDING\_DECOMPRESS | PENDING\_READS | PENDING\_FLUSH\_LRU | PENDING\_FLUSH\_LIST | PAGES\_MADE\_YOUNG | PAGES\_NOT\_MADE\_YOUNG | PAGES\_MADE\_YOUNG\_RATE | PAGES\_MADE\_NOT\_YOUNG\_RATE | NUMBER\_PAGES\_READ | NUMBER\_PAGES\_CREATED | NUMBER\_PAGES\_WRITTEN | PAGES\_READ\_RATE | PAGES\_CREATE\_RATE | PAGES\_WRITTEN\_RATE | NUMBER\_PAGES\_GET | HIT\_RATE | YOUNG\_MAKE\_PER\_THOUSAND\_GETS | NOT\_YOUNG\_MAKE\_PER\_THOUSAND\_GETS | NUMBER\_PAGES\_READ\_AHEAD | NUMBER\_READ\_AHEAD\_EVICTED | READ\_AHEAD\_RATE | READ\_AHEAD\_EVICTED\_RATE | LRU\_IO\_TOTAL | LRU\_IO\_CURRENT | UNCOMPRESS\_TOTAL | UNCOMPRESS\_CURRENT |
 | :------- | :--------- | :------------ | :-------------- | :------------------- | :------------------------ | :------------------ | :------------- | :------------------ | :------------------- | :----------------- | :---------------------- | :----------------------- | :---------------------------- | :------------------ | :--------------------- | :--------------------- | :---------------- | :------------------ | :------------------- | :----------------- | :-------- | :------------------------------- | :------------------------------------ | :------------------------- | :--------------------------- | :---------------- | :------------------------- | :------------- | :--------------- | :---------------- | :------------------ |
 | 0        | 8191       | 1024          | 7162            | 2623                 | 0                         | 0                   | 0              | 0                   | 0                    | 7720576            | 456154990               | 0                        | 0                             | 10267303            | 1514710                | 2334136                | 0                 | 0                   | 0                    | 1969270034         | 0         | 0                                | 0                                     | 1897385                    | 54410                        | 0                 | 0                          | 0              | 0                | 0                 | 0                   |
 
-​	相关信息的主要内容其实在上面已经叙述过，所以这里不再讨论。
+​	在非生产环境下，表**information_schema.INNODB_BUFFER_PAGE**将提供给我们关于buffer pool中每一个内存页的信息：
+
+| POOL\_ID | BLOCK\_ID | SPACE | PAGE\_NUMBER | PAGE\_TYPE | FLUSH\_TYPE | FIX\_COUNT | IS\_HASHED | NEWEST\_MODIFICATION | OLDEST\_MODIFICATION | ACCESS\_TIME | TABLE\_NAME | INDEX\_NAME | NUMBER\_RECORDS | DATA\_SIZE | COMPRESSED\_SIZE | PAGE\_STATE | IO\_FIX  | IS\_OLD | FREE\_PAGE\_CLOCK |
+| :------- | :-------- | :---- | :----------- | :--------- | :---------- | :--------- | :--------- | :------------------- | :------------------- | :----------- | :---------- | :---------- | :-------------- | :--------- | :--------------- | :---------- | :------- | :------ | :---------------- |
+| 0        | 0         | 1847  | 5779         | INDEX      | 0           | 0          | NO         | 0                    | 0                    | 3620866828   | \`a\`.\`b\` | PRIMARY     | 61              | 14844      | 0                | FILE\_PAGE  | IO\_NONE | NO      | 11767432          |
+| 0        | 1         | 1847  | 10176        | INDEX      | 0           | 0          | NO         | 0                    | 0                    | 3620887249   | \`a\`.\`b\` | uuid        | 227             | 8853       | 0                | FILE\_PAGE  | IO\_NONE | YES     | 0                 |
+| 0        | 2         | 1848  | 9398         | INDEX      | 0           | 0          | NO         | 0                    | 0                    | 2507606063   | \`a\`.\`c\` | PRIMARY     | 99              | 15129      | 0                | FILE\_PAGE  | IO\_NONE | NO      | 11762960          |
+| 0        | 3         | 0     | 669          | UNDO\_LOG  | 1           | 0          | NO         | 23585329985          | 0                    | 3298651665   | NULL        | NULL        | 0               | 0          | 0                | FILE\_PAGE  | IO\_NONE | NO      | 11764958          |
+| 0        | 4         | 1847  | 15252        | INDEX      | 0           | 0          | NO         | 0                    | 0                    | 3620867147   | \`a\`.\`b\` | PRIMARY     | 36              | 15138      | 0                | FILE\_PAGE  | IO\_NONE | YES     | 0                 |
