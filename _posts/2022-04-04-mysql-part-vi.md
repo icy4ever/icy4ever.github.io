@@ -89,10 +89,15 @@ select * from student = 'mich%';
 就可以利用索引。
 
 ​	当创建联合索引时，比如字段a,b,c是一组联合索引，此时如果b使用了模糊查询，此时后面的c将无法使用索引。具体的，MySQL会将符合a以及模糊b的所有二级索引查出来，然后根据筛选条件过滤掉不需要的行再去聚簇索引中获取对应的数据。这种规则通常被称为**最左前缀规则**。
-
 ## SQL执行计划
 
 ​	一个查询语句是否用到索引，通常我们会使用explain来看他对应返回的结果。如果一条查询没有用到任何索引，那么它将会扫描全表，此时explain会返回如下结果：
+
+| id   | select\_type | table | type | possible\_keys | key  | key\_len | ref  | rows  | Extra |
+| :--- | :----------- | :---- | :--- | :------------- | :--- | :------- | :--- | :---- | :---- |
+| 1    | SIMPLE       | a     | ALL  | NULL           | NULL | NULL     | NULL | 61397 |       |
+
+### 范围查询
 
 ```mysql
 explain select * from a where a.uid = 8 or a.uid=7381;
