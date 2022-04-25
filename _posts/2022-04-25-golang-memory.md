@@ -100,7 +100,7 @@ type mcentral struct {
 
 ## 参考
 
-- https://medium.com/@ankur_anand/a-visual-guide-to-golang-memory-allocator-from-ground-up-e132258453ed
-- https://medium.com/a-journey-with-go/go-memory-management-and-allocation-a7396d430f44
-- https://github.com/golang/go
+- [a-visual-guide-to-golang-memory-allocator-from-ground-up](https://medium.com/@ankur_anand/a-visual-guide-to-golang-memory-allocator-from-ground-up-e132258453ed)
+- [go-memory-management-and-allocation](https://medium.com/a-journey-with-go/go-memory-management-and-allocation-a7396d430f44)
+- [golang source code](
 
