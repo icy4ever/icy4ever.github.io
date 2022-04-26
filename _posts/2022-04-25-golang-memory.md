@@ -28,7 +28,8 @@
 ​	执行完毕后，栈帧将被回收，这里main方法其实运行在main的goroutine上。
 
 ​	其实对于Go来说，变量分配在堆和栈上其实是由编译器（complier）决定的，通常来说对于方法的返回值，如果返回指针，将可能导致内存逃逸。即本应该在栈中的变量被分配到堆中，比如下面这段代码：
-![image-20220423220638627](https://user-images.githubusercontent.com/38686456/165136796-6e07f6c3-a163-4a1e-bafc-209c369b4229.png)
+
+<img src="https://user-images.githubusercontent.com/38686456/165136796-6e07f6c3-a163-4a1e-bafc-209c369b4229.png" alt="image-20220423220638627" style="zoom:50%;" />
 
 ​	由于a需要引用pointer方法返回的num值的地址，但当pointer执行完毕后栈帧会被标记为未使用，所以该变量会被放到堆内存上。当然，如果编译器选择内联函数，即直接将pointer方法拷贝到main的栈帧中，该变量将被分配到栈上。可以用 `//go:noinline`来禁用内联函数。
 
