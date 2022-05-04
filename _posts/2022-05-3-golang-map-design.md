@@ -37,8 +37,7 @@ type bmap struct {
    tophash [bucketCnt]uint8
 }
 ```
-
-`tophash`是一个大小为8的uint8的数组（意味着kv数也是8），它并不用来存放数据的指针（uint8也存不了指针对吧～），而是存放对应数据的状态的（如`evacuatedEmpty`代表数据已经迁移、`emptyOne`代表此块是空的）。它的数据将存放在tophash随后的内存块中，Go通常使用
+`tophash`是一个大小为8的uint8的数组（意味着kv数也是8），它并不用来存放数据的指针（uint8也存不了指针对吧～），而是存放对应数据的状态的（如`4 evacuatedEmpty`代表数据已经迁移、`1 emptyOne`代表此块是空的）。它的数据将存放在tophash随后的内存块中，Go通常使用
 
 ```go
 dataOffset = unsafe.Offsetof(struct {
@@ -49,7 +48,7 @@ dataOffset = unsafe.Offsetof(struct {
 
 来获取bmap随后的数据。
 
-​	那么，它的数据存储格式是怎么样的呢？Go为了减少数据补齐，将map的key放在一起，value放在一起，举个例子，当key为int64类型，而值为bool类型时，对比k/v、k/v形式如下图所示：
+​	那么，它的数据存储格式是怎么样的呢？Go为了减少数据补齐，将map的key放在一起，value放在一起，举个例子，当key为int64类型，而值为bool类型时，与每个kv一组形式对比如下图所示：
 
 ![bucket键值变化](https://user-images.githubusercontent.com/38686456/166621208-bfd3c35b-3e37-4a7b-a3b1-b1e351b23c1c.png)
 
@@ -57,7 +56,7 @@ dataOffset = unsafe.Offsetof(struct {
 
 ## map初始化
 
-​	通常，我们会使用`make`做map的初始化操作，对于make来说，我们可以选择是否传入map的大小。但是这个大小是什么大小呢？是bucket数量还是元素数量？其实都不是。对于map来说，它会通过传入的元素数量来计算`hmap.B`的大小，这和**负载因子**有关，在Go 1.16.5 版本中，负载因子为6.5，这意味着如果我们传入size为8时，B的值为1（即会产生2个bucket）。至此我们可以得到一个大致的map的形状：
+​	通常，我们会使用`make`做map的初始化操作，对于make来说，我们可以选择是否传入map的size，Go并不会直接生成与size相同的bucket数量。而是通过传入的元素数量来计算`hmap.B`的大小，这和**负载因子**有关，在Go 1.16.5 版本中，负载因子为6.5，这意味着如果我们传入size为8时，B的值为1（即会产生2个bucket）。至此我们可以得到一个大致的map的形状：
 ![map设计](https://user-images.githubusercontent.com/38686456/166621218-6b046604-59df-4877-a8f0-5209da5e834d.png)
 
 *tips：颜色代表内存块被使用，白色代表未使用*
