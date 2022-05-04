@@ -1,3 +1,5 @@
+# 浅谈Golang数据结构之Map
+
 ![img](https://miro.medium.com/max/1400/1*g3YPGXr9hx8wuLR-Edfs-Q.png)
 
 ​	Go语言在runtime里实现了hashmap的数据结构，也就是我们常用的map。虽然经常使用，但是很少有机会看它的底层实现，所以今天有空就简单分析一下Go的map实现。
